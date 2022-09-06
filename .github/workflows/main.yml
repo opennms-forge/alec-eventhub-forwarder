@@ -28,10 +28,10 @@ jobs:
       # Runs a single command using the runners shell
       - name: Run gradle build
         run: |
-          ls ${github.repository}
-          cd ${github.repository}
+          ls ${GITHUB_WORKSPACE}
+          cd ${GITHUB_WORKSPACE}
           ls
-          ${github.repository}/gradlew clean installDist
+          gradlew clean installDist
 
       # Runs a set of commands using the runners shell
       #- name: Run a multi-line script
