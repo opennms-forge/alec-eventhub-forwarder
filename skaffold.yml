@@ -1,0 +1,17 @@
+apiVersion: skaffold/v2beta29
+kind: Config
+
+
+build:
+  artifacts:
+  - image: alecdataserver
+    custom:
+      buildCommand: mvn -Dimage=$IMAGE package $(if [ $PUSH_IMAGE = true ]; then echo jib:build; else echo jib:dockerBuild; fi)
+      dependencies:
+        paths:
+        - src/**
+deploy:
+  kubectl:
+    manifests:
+      - tf/k8s-*
+      - src/main/resources/k8s-*

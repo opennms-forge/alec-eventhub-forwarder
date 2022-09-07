@@ -42,6 +42,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.io.FileInputStream;
 
@@ -52,21 +53,41 @@ public class AlecCloudServer {
 
   private static String connectionString = "";
   private static String eventHubName = "";
+  private static String jwtkey = "";
   private Server server;
 
   private void start() throws IOException {
-    Properties props = new Properties();
-    props.load(new FileInputStream("runtime.properties"));
-
     /* The port on which the server should run */
-    int port = Integer.valueOf(props.getProperty("GRPC_PORT"));
-    connectionString = props.getProperty("EH_CONNECTION_STRING");
-    eventHubName = props.getProperty("EH_NAME");
+    Map<String, String> env = System.getenv();
+    int port = 50051;
+    if (env.containsKey("GRPC_PORT")) {
+      port = Integer.valueOf(env.get("GRPC_PORT"));
+    }
 
-    logger.info("key is " + props.getProperty("JWT_SIGNING_KEY"));
+    if (env.containsKey("EH_CONNECTION_STRING")) {
+      connectionString = env.get("EH_CONNECTION_STRING");
+    } else {
+      logger.severe("Missing EH_CONNECTION_STRING environment variable");
+      System.exit(-1);
+    }
+
+    if (env.containsKey("EH_NAME")) {
+      eventHubName = env.get("EH_NAME");
+    } else {
+      logger.severe("Missing EH_NAME environment variable");
+      System.exit(-1);
+    }
+
+    if (env.containsKey("JWT_SIGNING_KEY")) {
+      jwtkey = env.get("JWT_SIGNING_KEY");
+    } else {
+      logger.severe("Missing JWT_SIGNING_KEY environment variable");
+      System.exit(-1);
+    }
+    logger.info("key is " + jwtkey);
     server = ServerBuilder.forPort(port)
         .addService(new AlecCollectionServiceImpl())
-        .intercept(new AuthorizationServerInterceptor(props.getProperty("JWT_SIGNING_KEY")))
+        .intercept(new AuthorizationServerInterceptor(jwtkey))
         .build()
         .start();
     logger.info("Server started, listening on " + port);

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alec-eventhub-forwarder
+  labels:
+    app: alec
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alec
+  template:
+    metadata:
+      labels:
+        app: alec
+    spec:
+      containers:
+      - name: alec-eventhub-forwarder
+        image: alecdataserver
+        ports:
+        - containerPort: 50051
+        env:
+          - name: EH_NAME
+            valueFrom:
+              secretKeyRef:
+                name: az-secrets
+                key: EH_NAME
+          - name: EH_CONNECTION_STRING
+            valueFrom:
+              secretKeyRef:
+                name: az-secrets
+                key: EH_CONNECTION_STRING
+          - name: JWT_SIGNING_KEY
+            valueFrom:
+              secretKeyRef:
+                name: jwt-secret
+                key: JWT_SIGNING_KEY
+
