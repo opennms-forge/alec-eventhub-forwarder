@@ -84,6 +84,7 @@ public class AlecCloudServer {
       logger.severe("Missing JWT_SIGNING_KEY environment variable");
       System.exit(-1);
     }
+
     logger.info("key is " + jwtkey);
     server = ServerBuilder.forPort(port)
         .addService(new AlecCollectionServiceImpl())
